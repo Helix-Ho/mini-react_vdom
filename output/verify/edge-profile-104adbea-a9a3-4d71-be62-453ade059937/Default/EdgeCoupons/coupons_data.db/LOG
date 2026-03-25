@@ -1,0 +1,4 @@
+2026/03/26-00:33:40.326 7670 Creating DB c:\KJ_4th_5TEAM\output\verify\edge-profile-104adbea-a9a3-4d71-be62-453ade059937\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/03/26-00:33:40.353 7670 Reusing MANIFEST c:\KJ_4th_5TEAM\output\verify\edge-profile-104adbea-a9a3-4d71-be62-453ade059937\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/03/26-00:33:40.991 48f4 Level-0 table #5: started
+2026/03/26-00:33:41.007 48f4 Level-0 table #5: 681825 bytes OK

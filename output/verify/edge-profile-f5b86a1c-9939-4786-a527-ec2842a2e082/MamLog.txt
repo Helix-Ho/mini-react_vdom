@@ -1,0 +1,18 @@
+[2026-03-25T15:31:57.781Z] [INFO] ========================================================================================================================
+[2026-03-25T15:31:57.781Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 146.0.3856.72
+SDK: 2.1.367.0
+OS: windows 10.0.26200.8037
+DeviceType: Desktop
+Manufacturer: LG Electronics
+Model: 15ZD95N-GX56K
+Telemetry: yes
+Managed device support: disabled
+[2026-03-25T15:31:57.782Z] [INFO] Telemetry session 7f03b9e1-f7f6-436c-84b8-04501d378e3c.
+[2026-03-25T15:31:57.782Z] [INFO] Initializing cache (v1).
+[2026-03-25T15:31:57.837Z] [INFO] Registered UserID:59542722-c53c-493b-93db-c12ecf428034 in the Azure public cloud.
+[2026-03-25T15:31:57.837Z] [INFO] Conditional Access is blocked for UserID:59542722-c53c-493b-93db-c12ecf428034 pre-enrollment; compliance reporting will be accelerated to unblock the user.
+[2026-03-25T15:31:57.837Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:59542722-c53c-493b-93db-c12ecf428034 to run as soon as possible.
+[2026-03-25T15:31:57.837Z] [INFO] Scheduler background thread starting for UserID:59542722-c53c-493b-93db-c12ecf428034.
+[2026-03-25T15:31:58.982Z] [INFO] Shutting down.
+[2026-03-25T15:31:58.987Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...

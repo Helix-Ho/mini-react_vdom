@@ -1,0 +1,104 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - article [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]:
+            - generic [ref=e9]: Patch Trace
+            - heading "DIFF LOG" [level=2] [ref=e10]
+          - generic [ref=e12]:
+            - strong [ref=e13]: 변경 없음
+            - generic [ref=e14]: 현재 상태와 비교했을 때 새로 적용할 PATCH가 없습니다.
+      - article [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18]: Observer Feed
+            - heading "MUTATION LOG" [level=2] [ref=e19]
+          - generic [ref=e21]:
+            - strong [ref=e22]: Mutation 대기 중
+            - generic [ref=e23]: PATCH, UNDO, REDO를 실행하면 실제 DOM 변경 로그가 여기에 표시됩니다.
+    - generic [ref=e24]:
+      - article [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - paragraph [ref=e29]: Applied Result
+              - heading "실제 영역" [level=2] [ref=e30]
+            - generic [ref=e31]:
+              - generic [ref=e32]: HISTORY
+              - strong [ref=e33]: 0 / 0
+          - generic [ref=e36]:
+            - heading "Virtual DOM Demo Interactive" [level=2] [ref=e37]:
+              - text: Virtual DOM Demo
+              - generic [ref=e38]: Interactive
+            - paragraph [ref=e39]:
+              - text: This sample shows how
+              - strong [ref=e40]: partial patches
+              - text: update the real DOM.
+            - list [ref=e41]:
+              - listitem [ref=e42]: Change this text node
+              - listitem [ref=e43]: Change attributes on this list
+              - listitem [ref=e44]: Add or remove list items
+            - generic [ref=e45]:
+              - button "Primary action" [ref=e46]
+              - button "Disabled sample" [disabled] [ref=e47]
+              - link "Read docs" [ref=e48] [cursor=pointer]:
+                - /url: https://example.com/docs
+      - article [ref=e49]:
+        - generic [ref=e50]:
+          - generic [ref=e52]:
+            - paragraph [ref=e53]: Pending Preview
+            - heading "프리뷰 영역" [level=2] [ref=e54]
+          - generic:
+            - text: PATCH 전 미리보기
+            - generic:
+              - generic:
+                - heading "Virtual DOM Demo Interactive" [level=2]:
+                  - text: Virtual DOM Demo
+                  - generic: Interactive
+                - paragraph:
+                  - text: This sample shows how
+                  - strong: partial patches
+                  - text: update the real DOM.
+                - list:
+                  - listitem: Change this text node
+                  - listitem: Change attributes on this list
+                  - listitem: Add or remove list items
+                - generic:
+                  - button "Primary action"
+                  - button "Disabled sample" [disabled]
+                  - link "Read docs":
+                    - /url: https://example.com/docs
+    - generic [ref=e55]:
+      - article [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e59]:
+            - paragraph [ref=e60]: Source Input
+            - heading "HTML 형식 편집 영역" [level=2] [ref=e61]
+          - generic [ref=e62]: HTML editor
+          - textbox "HTML editor" [ref=e63]: <section id="product-panel" class="demo-section featured" data-role="product" data-version="1"> <h2> Virtual DOM Demo <span class="status-badge" data-tone="warm">Interactive</span> </h2> <p class="intro"> This sample shows how <strong>partial patches</strong> update the real DOM. </p> <ul class="feature-list" data-count="3"> <li class="feature-item">Change this text node</li> <li class="feature-item">Change attributes on this list</li> <li class="feature-item">Add or remove list items</li> </ul> <div class="action-row" data-group="primary"> <button type="button" class="primary-button">Primary action</button> <button type="button" class="secondary-button" disabled>Disabled sample</button> <a href="https://example.com/docs" class="inline-link" data-track="docs">Read docs</a> </div> </section>
+          - paragraph [ref=e64]: 입력 HTML이 브라우저 파서와 보안 규칙에 따라 정규화되었습니다. 편집 영역은 정리된 결과로 다시 동기화됩니다.
+      - article [ref=e65]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - paragraph [ref=e69]: Structure View
+              - heading "DOM 형식 편집 영역" [level=2] [ref=e70]:
+                - text: DOM 형식
+                - text: 편집 영역
+            - generic [ref=e71]:
+              - generic [ref=e72]: LAST PATCH
+              - strong [ref=e73]: 초기 샘플 상태를 history[0]에 저장했습니다.
+          - generic [ref=e74]: DOM structure
+          - textbox "DOM structure" [ref=e75]: "{ \"nodeType\": \"ELEMENT\", \"tag\": \"div\", \"props\": { \"data-vdom-wrapper\": \"true\" }, \"children\": [ { \"nodeType\": \"ELEMENT\", \"tag\": \"section\", \"props\": { \"id\": \"product-panel\", \"class\": \"demo-section featured\", \"data-role\": \"product\", \"data-version\": \"1\" }, \"children\": [ { \"nodeType\": \"ELEMENT\", \"tag\": \"h2\", \"props\": {}, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"\\n Virtual DOM Demo\\n \" }, { \"nodeType\": \"ELEMENT\", \"tag\": \"span\", \"props\": { \"class\": \"status-badge\", \"data-tone\": \"warm\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Interactive\" } ] } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"p\", \"props\": { \"class\": \"intro\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"\\n This sample shows how \" }, { \"nodeType\": \"ELEMENT\", \"tag\": \"strong\", \"props\": {}, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"partial patches\" } ] }, { \"nodeType\": \"TEXT\", \"text\": \" update the real DOM.\\n \" } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"ul\", \"props\": { \"class\": \"feature-list\", \"data-count\": \"3\" }, \"children\": [ { \"nodeType\": \"ELEMENT\", \"tag\": \"li\", \"props\": { \"class\": \"feature-item\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Change this text node\" } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"li\", \"props\": { \"class\": \"feature-item\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Change attributes on this list\" } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"li\", \"props\": { \"class\": \"feature-item\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Add or remove list items\" } ] } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"div\", \"props\": { \"class\": \"action-row\", \"data-group\": \"primary\" }, \"children\": [ { \"nodeType\": \"ELEMENT\", \"tag\": \"button\", \"props\": { \"type\": \"button\", \"class\": \"primary-button\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Primary action\" } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"button\", \"props\": { \"type\": \"button\", \"class\": \"secondary-button\", \"disabled\": true }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Disabled sample\" } ] }, { \"nodeType\": \"ELEMENT\", \"tag\": \"a\", \"props\": { \"href\": \"https://example.com/docs\", \"class\": \"inline-link\", \"data-track\": \"docs\" }, \"children\": [ { \"nodeType\": \"TEXT\", \"text\": \"Read docs\" } ] } ] } ] } ] }"
+  - generic [ref=e76]:
+    - generic [ref=e77]:
+      - button "UNDO" [disabled] [ref=e78]
+      - button "PATCH" [ref=e79] [cursor=pointer]
+      - button "REDO" [disabled] [ref=e80]
+    - generic [ref=e81]:
+      - button "TEST 1" [ref=e82] [cursor=pointer]
+      - button "TEST 2" [ref=e83] [cursor=pointer]
+      - button "TEST 3" [ref=e84] [cursor=pointer]
+      - button "TEST 4" [ref=e85] [cursor=pointer]
+      - button "TEST 5" [ref=e86] [cursor=pointer]

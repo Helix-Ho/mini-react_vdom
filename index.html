@@ -8,104 +8,112 @@
 </head>
 <body>
   <div class="page-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Vanilla JavaScript Demo</p>
-        <h1>Virtual DOM + Diff + Patch + History</h1>
-        <p class="hero-copy">
-          실제 DOM을 Virtual DOM으로 변환하고, 두 상태를 비교한 뒤, 필요한 부분만 Patch로 반영하는 흐름을 한 화면에서 확인할 수 있습니다.
-        </p>
-      </div>
-      <div class="hero-note">
-        <strong>학습 포인트</strong>
-        <span>DOM 파싱, 재귀 트리 순회, index 기반 Diff, 부분 Patch, MutationObserver, Undo/Redo</span>
-      </div>
-    </header>
+    <main class="board-shell">
+      <section class="board-layout">
+        <aside class="stack-column log-rail">
+          <article class="board-card card compact-card">
+            <div class="card-outline outline-diff">
+              <div class="side-panel-head">
+                <span class="side-panel-kicker">Patch Trace</span>
+                <h2>DIFF LOG</h2>
+              </div>
+              <div id="diff-log" class="log-list" aria-live="polite"></div>
+            </div>
+          </article>
 
-    <section class="controls card">
-      <div class="control-group">
-        <button id="patch-button" class="action-button primary" type="button">Patch</button>
-        <button id="undo-button" class="action-button" type="button">뒤로가기</button>
-        <button id="redo-button" class="action-button" type="button">앞으로가기</button>
-      </div>
-      <div class="status-group">
-        <div class="status-chip">
-          <span class="status-label">History</span>
-          <strong id="history-status">0 / 0</strong>
-        </div>
-        <div class="status-chip wide">
-          <span class="status-label">마지막 Patch 요약</span>
-          <strong id="patch-summary">초기 상태를 준비하는 중...</strong>
-        </div>
-      </div>
-    </section>
+          <article class="board-card card compact-card">
+            <div class="card-outline outline-mutation">
+              <div class="side-panel-head">
+                <span class="side-panel-kicker">Observer Feed</span>
+                <h2>MUTATION LOG</h2>
+              </div>
+              <div id="mutation-log" class="log-list" aria-live="polite"></div>
+            </div>
+          </article>
+        </aside>
 
-    <section class="checklist card">
-      <div class="panel-header">
-        <h2>빠른 테스트 체크리스트</h2>
-        <p>아래 항목은 화면과 README에서 모두 확인할 수 있습니다.</p>
-      </div>
-      <ol class="checklist-grid">
-        <li>텍스트만 변경</li>
-        <li>속성만 변경</li>
-        <li>새 노드 추가</li>
-        <li>노드 삭제</li>
-        <li>태그 타입 변경</li>
-        <li>중첩 자식 변경</li>
-        <li>disabled 속성 변경</li>
-        <li>Undo / Redo</li>
-        <li>Undo 후 새 Patch</li>
-        <li>MutationObserver 로그</li>
-      </ol>
-    </section>
+        <section class="stack-column main-stage">
+          <article class="board-card card">
+            <div class="card-outline outline-main">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Applied Result</p>
+                  <h2>실제 영역</h2>
+                </div>
+                <div class="status-pill">
+                  <span>HISTORY</span>
+                  <strong id="history-status">0 / 0</strong>
+                </div>
+              </div>
+              <div id="actual-canvas" class="board-canvas actual-canvas" aria-live="polite"></div>
+            </div>
+          </article>
 
-    <main class="workspace">
-      <section class="panel card">
-        <div class="panel-header">
-          <h2>실제 영역</h2>
-          <p>Patch 결과가 실제 DOM에 부분적으로 반영되는 영역입니다.</p>
-        </div>
-        <div id="actual-canvas" class="actual-canvas" aria-live="polite"></div>
+          <article class="board-card card">
+            <div class="card-outline outline-main muted-outline">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Pending Preview</p>
+                  <h2>프리뷰 영역</h2>
+                </div>
+              </div>
+              <div id="preview-canvas" class="board-canvas preview-canvas" aria-live="polite"></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="stack-column editor-stage">
+          <article class="board-card card">
+            <div class="card-outline outline-editor">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Source Input</p>
+                  <h2>HTML 형식 편집 영역</h2>
+                </div>
+              </div>
+              <label class="sr-only" for="html-editor">HTML editor</label>
+              <textarea id="html-editor" class="editor-surface html-editor" spellcheck="false"></textarea>
+              <p id="parser-note" class="panel-note">
+                브라우저 파서가 잘못된 HTML을 자동 보정하며, <code>script</code> 태그와 <code>on*</code> 이벤트 속성은 제거합니다.
+              </p>
+            </div>
+          </article>
+
+          <article class="board-card card">
+            <div class="card-outline outline-editor">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Structure View</p>
+                    <h2>DOM 형식 <br>편집 영역</h2>
+                </div>
+                <div class="status-pill wide">
+                  <span>LAST PATCH</span>
+                  <strong id="patch-summary">초기 상태를 준비하는 중...</strong>
+                </div>
+              </div>
+
+              <label class="sr-only" for="dom-editor">DOM structure</label>
+              <textarea id="dom-editor" class="editor-surface dom-editor" spellcheck="false" readonly></textarea>
+            </div>
+          </article>
+        </section>
       </section>
 
-      <section class="panel card">
-        <div class="panel-header">
-          <h2>테스트 영역</h2>
-          <p>HTML을 자유롭게 수정한 뒤 Patch 버튼으로 Diff를 실행하세요.</p>
+      <section class="command-bar card">
+        <div class="command-group primary-actions">
+          <button id="undo-button" class="action-button" type="button">UNDO</button>
+          <button id="patch-button" class="action-button primary" type="button">PATCH</button>
+          <button id="redo-button" class="action-button" type="button">REDO</button>
         </div>
-        <label class="sr-only" for="html-editor">HTML editor</label>
-        <textarea id="html-editor" class="html-editor" spellcheck="false"></textarea>
-        <p id="parser-note" class="panel-note">
-          브라우저 파서는 잘못된 HTML을 자동 보정할 수 있고, <code>script</code> 태그와 <code>on*</code> 이벤트 속성은 제거됩니다.
-        </p>
+        <div class="command-group test-actions">
+          <button class="action-button test-button" type="button" data-test-id="1">TEST 1</button>
+          <button class="action-button test-button" type="button" data-test-id="2">TEST 2</button>
+          <button class="action-button test-button" type="button" data-test-id="3">TEST 3</button>
+          <button class="action-button test-button" type="button" data-test-id="4">TEST 4</button>
+          <button class="action-button test-button" type="button" data-test-id="5">TEST 5</button>
+        </div>
       </section>
     </main>
-
-    <section class="bottom-panels">
-      <article class="panel card">
-        <div class="panel-header">
-          <h2>Diff 결과 로그</h2>
-          <p>Diff 알고리즘이 찾은 Patch 목록입니다.</p>
-        </div>
-        <div id="diff-log" class="log-list"></div>
-      </article>
-
-      <article class="panel card">
-        <div class="panel-header">
-          <h2>Virtual DOM JSON</h2>
-          <p>현재 상태의 Virtual DOM 요약입니다.</p>
-        </div>
-        <pre id="vdom-preview" class="code-panel"></pre>
-      </article>
-
-      <article class="panel card">
-        <div class="panel-header">
-          <h2>MutationObserver 로그</h2>
-          <p>Patch 또는 History 복원 시 실제 DOM에서 발생한 mutation을 기록합니다.</p>
-        </div>
-        <div id="mutation-log" class="log-list"></div>
-      </article>
-    </section>
   </div>
 
   <script src="app.js"></script>

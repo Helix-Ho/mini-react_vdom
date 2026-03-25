@@ -1,0 +1,5 @@
+2026/03/26-00:14:58.844 3848 Creating DB c:\KJ_4th_5TEAM\output\verify\edge-profile\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/03/26-00:14:58.853 3848 Reusing MANIFEST c:\KJ_4th_5TEAM\output\verify\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/03/26-00:14:58.865 5dbc Level-0 table #5: started
+2026/03/26-00:14:58.873 5dbc Level-0 table #5: 681825 bytes OK
+2026/03/26-00:14:58.876 5dbc Delete type=0 #3

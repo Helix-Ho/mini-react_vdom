@@ -1,290 +1,249 @@
-# Virtual DOM Mini Project
+# Vanilla JS Virtual DOM Diff Demo
 
-브라우저 DOM을 Virtual DOM 트리로 읽고, old/new VDOM diff 결과를 path 기반 patch로 계산한 뒤, 실제 DOM에 필요한 변경만 반영하고 snapshot history 로 undo/redo 까지 보여 주는 Vanilla JS 미니 프로젝트입니다.
+React의 핵심 개념인 Virtual DOM, Diff 알고리즘, Patch 적용, State History를 순수 HTML/CSS/JavaScript만으로 구현한 데모 프로젝트입니다.
 
-## 1. 프로젝트 소개
-
-이 프로젝트의 목적은 단순히 동작하는 결과물을 만드는 것이 아니라, `DOM -> VDOM -> diff -> patch -> history` 흐름을 직접 구현하고 설명 가능한 상태로 만드는 것입니다.
-
-현재 구현 범위:
-- 실제 영역 / 테스트 영역 / Patch / Back / Forward UI
-- DOM -> VDOM 변환
-- VDOM -> DOM 렌더링
-- diff 핵심 5케이스 + path 기반 patch
-- 실제 DOM patch 적용
-- snapshot history 기반 undo/redo
-- `data-key` 기반 identity
-
-의도적으로 뒤로 미룬 범위:
-- full MOVE 최적화
-- inverse patch 기반 undo
-- React 수준 batching / scheduler
-- 모든 HTML edge case 완전 지원
-
-## 2. 실행 방법
-
-정적 HTML/CSS/JS 프로젝트입니다.
-
-1. 저장소 루트에서 `npm test`
-2. `python3 -m http.server 4173`
-3. 브라우저에서 `http://127.0.0.1:4173` 열기
-
-## 3. 데모 시나리오
-
-### 3-1. 초기 상태
-- actual area 에 baseline sample HTML 이 보인다.
-- textarea 에 같은 sample HTML 이 들어 있다.
-- preview 는 현재 textarea 로부터 다시 렌더된 DOM 이다.
-- history 는 `Snapshot 1/1`에서 시작한다.
-- demo presets 에서 `Reset Baseline` 이 활성 상태다.
-
-### 3-2. Patch 시연
-- `Text + Attr` preset 을 누른다.
-- `Patch` 를 누른다.
-- patch JSON 과 patch log 를 확인한다.
-- actual area 가 전체 rerender 대신 patch 결과만 반영한 상태로 바뀐다.
-
-### 3-3. Undo / Redo 시연
-- `Reset Baseline` 후 `Text + Attr`, `Insert Child`, `Keyed Reorder` 를 순서대로 patch 한다.
-- `Back` 을 눌러 이전 snapshot 으로 돌아간다.
-- actual area, textarea, preview, VDOM inspector 가 함께 바뀌는지 확인한다.
-- `Forward` 로 다시 앞으로 이동한다.
-
-### 3-4. data-key 시연
-- `Reset Baseline` 후 `Insert Child` 또는 `Keyed Reorder` preset 을 사용한다.
-- `Patch` 를 눌러 keyed insert/remove 또는 `REORDER` patch 를 확인한다.
-- `Duplicate Key` preset 으로 warning 과 index fallback 도 바로 보여 줄 수 있다.
-
-## 4. 핵심 개념
-
-### DOM
-- 브라우저가 실제로 렌더하는 트리
-- 변경 비용이 커서 작은 변경만 반영하는 것이 중요하다
-
-### Virtual DOM
-- 실제 DOM 을 비교/설명하기 쉬운 순수 데이터 트리로 표현한 것
-- 이 프로젝트에서는 `root`, `element`, `text` 세 타입으로 표현한다
-- 브라우저 `body`를 그대로 상태로 쓰지 않고, body 아래 의미 있는 children을 감싸는 synthetic `root` VNode를 둔다
-
-### Diff
-- old VDOM 과 new VDOM 을 비교해 어떤 위치가 달라졌는지 patch 목록으로 만든다
-- patch path 는 `root.0.1.0` 같은 위치 주소 역할을 한다
-- “같은 노드인가?”와 “내용이 같은가?”를 분리해서 본다. 예를 들어 text node는 같은 위치의 같은 종류면 identity 는 유지하고, 값 차이는 `TEXT` patch 로 처리한다
-
-### Patch
-- diff 결과를 실제 DOM 에 적용하는 단계
-- 이 프로젝트에서는 `INSERT`, `REMOVE`, `REPLACE`, `TEXT`, `SET_ATTR`, `REMOVE_ATTR`, `REORDER` 를 사용한다
-- `REORDER` 는 full MOVE 최적화가 아니라, keyed child list 를 그 부모 아래에서 다시 맞추는 localized rerender 성격의 patch 다
-
-### data-key
-- list item 의 identity 를 유지하기 위한 규칙
-- 성능 최적화 옵션이 아니라 “누가 누구인가”를 알려 주는 라벨이다
-
-### History snapshot
-- patch 후의 VDOM 을 시점별 snapshot 으로 저장한다
-- undo/redo 는 inverse patch 가 아니라 snapshot 배열 + cursor 이동으로 구현한다
-- actual area DOM 과 textarea HTML 은 파생 결과이고, 장기 상태 저장소는 현재 VDOM snapshot 이다
-
-## 5. 핵심 알고리즘 설명
-
-### 5-1. DOM -> VDOM
-- `parseHtmlToRoot()` 가 textarea HTML 을 `DOMParser` 로 읽는다
-- `domToVNode()` 가 DOM node 를 재귀적으로 순회하며 VNode 로 바꾼다
-- `domToVNode()` 는 `children` 이 아니라 `childNodes` 를 읽어서 text node 도 비교 대상에 포함한다
-- whitespace-only text node 는 1차 버전에서 버려 diff noise 를 줄인다
-- comment 같은 비핵심 node type 은 현재 범위에서 건너뛴다
-
-### 5-2. VDOM -> DOM
-- `vNodeToDom()` 이 text node 또는 element node 를 다시 실제 DOM 으로 만든다
-- preview 와 actual area 모두 같은 렌더 경로를 사용한다
-- 이 단계 덕분에 “VDOM 은 실제로 렌더 가능한 상태 표현”이라고 설명할 수 있다
-
-### 5-3. Diff
-- `diff()` 는 old/new VDOM 을 DFS 방식으로 비교한다
-- 기본 케이스는 `INSERT`, `REMOVE`, `REPLACE`, `TEXT`, props diff 다
-- `isSameNode()` 는 node identity 판정 규칙이고, 그 뒤에 props/text 차이를 세부 patch 로 나눈다
-- `data-key` 가 있으면 keyed child matching 으로 identity 를 유지한다
-- keyed diff 는 sibling 전체가 keyed 일 때만 켜지고, duplicate key 나 mixed keyed/unkeyed list 는 안전하게 fallback 한다
-- reorder 는 full MOVE 최적화 대신 `REORDER` patch 로 처리한다
-
-### 5-4. Patch apply
-- `applyPatch()` 가 path 로 실제 DOM node 를 찾는다
-- patch 타입에 따라 text 수정, attr 수정, insert/remove/replace 를 수행한다
-- `REMOVE` 는 path drift 를 막기 위해 더 깊고 더 큰 index 부터 적용한다
-- root wrapper 는 실제 DOM node 가 아니므로, patch path 는 actual area container 의 `childNodes` 기준으로 해석한다
-
-### 5-5. History
-- patch 성공 후 current VDOM 을 snapshot history 에 push 한다
-- `Back` / `Forward` 는 cursor 를 움직이고 해당 snapshot 으로 actual area, textarea, preview 를 함께 다시 맞춘다
-- undo 뒤 새 patch 를 만들면 미래 snapshot 은 버린다
-- textarea 는 source of truth 가 아니라 새 상태를 만드는 재료이므로, history 이동 시에는 snapshot 에서 다시 만든 HTML 로 덮어쓴다
-
-## 6. 이번 주차 알고리즘 키워드와 연결
-
-### tree
-- DOM, VDOM, history snapshot 모두 트리 구조다
-
-### dfs
-- `domToVNode`, `vNodeToDom`, `diff`, `applyPatch` 전부 DFS 감각이 강하다
-
-### graph_basic
-- history 는 시점 이동, key 는 identity 관계를 이해하는 데 도움 된다
-
-### bst 규칙 감각
-- `same tag`, `same key` 같은 규칙이 비교 범위를 줄이고 설명 가능성을 높인다
-
-### topological 확장 아이디어
-- 1차 구현 필수는 아니지만, remove 순서나 patch commit 순서를 이해하는 데 연결된다
-
-## 7. 핵심 설계 선택
-
-### 왜 textarea + DOMParser 인가
-- 구현 복잡도가 낮다
-- HTML 파싱과 디버깅이 명확하다
-- contenteditable 특유의 selection/whitespace 문제를 줄일 수 있다
-
-### 왜 snapshot history 인가
-- inverse patch 보다 구현과 설명이 단순하다
-- “현재 상태 = 현재 VDOM snapshot” 구조와 잘 맞는다
-
-### 왜 root wrapper 와 path 배열을 같이 썼는가
-- 여러 top-level node 를 허용하면서도 일관된 diff 시작점을 만들 수 있다
-- `root -> child index -> child index` 형태의 path 가 `applyPatch()` 와 history 설명에 자연스럽게 이어진다
-
-### 왜 text node 규칙을 따로 설명해야 하는가
-- 브라우저는 text 도 node 로 다루기 때문에, `childNodes` 기준으로 읽어야 `TEXT` patch 가 생긴다
-- 대신 whitespace-only text 는 1차 버전에서 버려 노이즈를 줄였고, 이 선택은 범위 축소라는 점을 분명히 해야 한다
-
-### 왜 data-key 를 범위에 넣었는가
-- list item identity 를 설명하는 핵심 규칙이기 때문이다
-- key 가 없을 때 index diff 가 왜 한계가 있는지 데모하기 좋다
-
-### 무엇을 일부러 구현하지 않았는가
-- full MOVE 최적화
-- inverse patch undo
-- event/property diff 고도화
-- React 내부 scheduler / batching
-
-## 8. 테스트 / 검증
-
-### 8-1. 자동 테스트
-
-실행:
-
-```bash
-npm test
-```
-
-현재 커버하는 파일:
-- `tests/domToVNode.test.js`: DOM -> VDOM shape, whitespace rule, props 변환
-- `tests/vNodeToDom.test.js`: VDOM -> DOM 렌더
-- `tests/diff.test.js`: diff 5케이스와 nested path
-- `tests/applyPatch.test.js`: patch apply, remove ordering, reorder apply
-- `tests/history.test.js`: snapshot push, cursor 이동, future discard
-- `tests/keyedIdentity.test.js`: keyed insert/remove/reorder, duplicate key warning
-
-### 8-2. 수동 스모크 체크
-
-브라우저 시나리오는 [`tests/SMOKE_CHECKLIST.md`](tests/SMOKE_CHECKLIST.md)에 정리했습니다.
-
-핵심 확인 항목:
-- initial load
-- text / attr / insert / remove / replace patch
-- history undo/redo
-- undo 후 새 patch 시 redo 불가
-- keyed insert/remove/reorder
-- duplicate key warning
-
-### 8-3. 확인한 한계
-- reorder 는 `REORDER` patch 로 처리하고 full MOVE 최적화는 하지 않는다
-- duplicate key 는 경고만 남기고 자동 복구는 하지 않는다
-- `DOMParser` 가 invalid HTML 을 브라우저 방식으로 보정하므로, textarea 원문과 실제 비교 트리가 완전히 같지 않을 수 있다
-- mixed keyed/unkeyed child list 는 keyed diff 를 쓰지 않고 index 기반 비교로 fallback 한다
-- attribute 기반 업데이트만 다루므로 DOM property, boolean attr, form control edge case 는 단순화했다
-- browser automation 기반 E2E 는 아직 없다
-
-## 9. 프로젝트 구조
+## 파일 구조
 
 ```text
-src/
-  model/    VNode shape, clone 유틸
-  dom/      DOM 읽기, DOM 렌더, HTML 직렬화
-  diff/     diff core, props diff, keyed identity
-  patch/    실제 DOM patch 적용
-  history/  snapshot store, cursor 이동
-tests/
-  unit test + manual smoke checklist
-Lessons/
-  마일스톤별 학습 기록
+.
+├─ index.html
+├─ styles.css
+├─ app.js
+└─ README.md
 ```
 
-## 10. Lessons
+## 프로젝트 소개
 
-각 마일스톤별 기록:
-- [`Lessons/00_project_skeleton.md`](Lessons/00_project_skeleton.md)
-- [`Lessons/01_vnode_and_dom_reading.md`](Lessons/01_vnode_and_dom_reading.md)
-- [`Lessons/02_render_and_initial_sync.md`](Lessons/02_render_and_initial_sync.md)
-- [`Lessons/03_diff_core.md`](Lessons/03_diff_core.md)
-- [`Lessons/04_patch_application.md`](Lessons/04_patch_application.md)
-- [`Lessons/05_history_snapshot.md`](Lessons/05_history_snapshot.md)
-- [`Lessons/06_data_key_identity.md`](Lessons/06_data_key_identity.md)
-- [`Lessons/07_validation_readme_demo.md`](Lessons/07_validation_readme_demo.md)
-- [`Lessons/08_demo_presets.md`](Lessons/08_demo_presets.md)
-- [`Lessons/09_preset_smoke_flow.md`](Lessons/09_preset_smoke_flow.md)
-- [`Lessons/10_explanation_reinforcement.md`](Lessons/10_explanation_reinforcement.md)
-- [`Lessons/11_compact_frontend_layout.md`](Lessons/11_compact_frontend_layout.md)
+이 데모는 다음 흐름을 한 번에 보여주는 학습용 프로젝트입니다.
 
-이 폴더를 보면 “왜 구현했는지 / 어떻게 구현했는지 / 어떻게 검증했는지 / 무엇이 남았는지”를 단계별로 다시 복습할 수 있다.
+1. 실제 DOM 또는 HTML 문자열을 읽어서 Virtual DOM 트리로 변환
+2. 이전 Virtual DOM과 새 Virtual DOM을 비교해 Patch 생성
+3. Patch만 실제 DOM에 적용해 부분 업데이트 수행
+4. 상태를 history 배열에 저장해 Undo / Redo 지원
 
-## 11. 4분 데모 스크립트
+핵심은 "전체를 다시 그리지 않고, 바뀐 부분만 찾아 반영한다"는 점입니다.
 
-### 0:00 - 0:30
-- 프로젝트 한 줄 소개
-- 왜 실제 DOM 대신 VDOM + diff + patch 를 직접 구현했는지 설명
+## 왜 Virtual DOM이 필요한가
 
-### 0:30 - 1:20
-- 화면 구조 소개: actual area / textarea / preview / patch output / history
-- source of truth 를 current VDOM snapshot 으로 본다고 설명
+브라우저의 실제 DOM은 트리 구조이지만, 직접 수정할 때마다 레이아웃 계산과 페인팅 비용이 발생할 수 있습니다. 특히 변경이 자주 일어나면 브라우저가 reflow, repaint를 반복하게 되고, 복잡한 화면에서는 성능 부담이 커집니다.
 
-### 1:20 - 2:10
-- `Text + Attr` preset 선택
-- `Patch` 클릭
-- patch JSON 과 patch log 설명
-- actual area 가 전체 rerender 대신 patch 로 바뀌는 점 강조
+Virtual DOM은 실제 DOM의 가벼운 JavaScript 객체 버전입니다. 먼저 메모리 안에서 트리를 비교하고, 변경된 부분만 실제 DOM에 반영하면 불필요한 DOM 접근을 줄일 수 있습니다.
 
-### 2:10 - 2:50
-- `Insert Child`, `Keyed Reorder` 를 이어서 patch
-- `Back` / `Forward` 로 snapshot history 시연
-- actual area 와 textarea/preview 가 함께 바뀌는 점 보여 주기
+## 브라우저 렌더링 과정 간단 설명
 
-### 2:50 - 3:35
-- `Reset Baseline` 후 `Keyed Reorder` 또는 `Duplicate Key` preset 시연
-- `data-key` 가 없으면 index diff 가 흔들릴 수 있고, key 가 있으면 identity 를 유지한다는 점 설명
+브라우저는 일반적으로 아래 흐름으로 화면을 만듭니다.
 
-### 3:35 - 4:00
-- 테스트와 검증 흔적 소개
-- `npm test`, smoke checklist, Lessons 문서, README 구조를 짧게 마무리
+1. HTML 파싱
+2. DOM 트리 생성
+3. CSS 파싱
+4. Render Tree 생성
+5. Layout 계산
+6. Paint
+7. Composite
 
-## 12. 예상 질문 5개
+실제 DOM을 자주 건드리면 Layout과 Paint가 다시 일어날 수 있어서 비용이 커집니다.
 
-1. 왜 actual DOM 이 아니라 VDOM snapshot 을 source of truth 로 봤나요?
-2. 왜 undo/redo 를 inverse patch 가 아니라 snapshot 으로 구현했나요?
-3. 왜 reorder 를 full MOVE patch 가 아니라 `REORDER` 로 처리했나요?
-4. 왜 key 가 없으면 리스트 앞 삽입에서 문제가 생기나요?
-5. 어떤 edge case 는 아직 일부러 구현하지 않았나요?
+## 실제 DOM이 느린 이유
 
-## 13. 회고
+실제 DOM이 느린 이유는 단순히 "API가 느리다"기보다, DOM 변경이 브라우저 렌더링 파이프라인과 연결되어 있기 때문입니다.
 
-잘된 점:
-- DOM -> VDOM -> diff -> patch -> history 흐름을 단계별로 직접 설명할 수 있게 됐다
-- 자동 테스트와 수동 스모크 체크를 분리해서 검증 흔적을 남겼다
-- Lessons 문서가 구현 기록과 학습 기록을 동시에 맡게 됐다
+- Reflow: 요소 크기, 위치, 배치가 다시 계산됩니다.
+- Repaint: 색, 텍스트, 배경처럼 보이는 부분이 다시 그려집니다.
 
-아쉬운 점:
-- reorder 는 아직 full MOVE 최적화가 아니다
-- browser automation 기반 E2E 테스트는 없다
+따라서 DOM을 자주 직접 수정하는 것보다, 먼저 메모리 상의 Virtual DOM을 비교한 뒤 최소 수정만 적용하는 전략이 유리합니다.
 
-다음에 확장하고 싶은 점:
-- MOVE patch 최적화
-- preset 기반 smoke flow 자동화
-- README 에 GIF / screenshot 추가
+## Virtual DOM 구조 설명
+
+이 프로젝트는 아래 두 형태만 사용합니다.
+
+```js
+{
+  nodeType: "ELEMENT",
+  tag: "div",
+  props: {
+    id: "card",
+    class: "panel",
+    "data-role": "product"
+  },
+  children: []
+}
+```
+
+```js
+{
+  nodeType: "TEXT",
+  text: "Hello"
+}
+```
+
+규칙:
+
+- 공백만 있는 text node는 무시
+- 주석 노드는 무시
+- 속성은 일반 객체에 저장
+- childNodes를 재귀 순회해 트리를 구성
+- boolean 속성(`disabled`, `checked`, `selected`)은 `true` / 제거 방식으로 처리
+
+## 핵심 함수
+
+### DOM / VDOM 변환
+
+- `parseHTMLToDOM(htmlString)`: HTML 문자열을 DOM으로 파싱하고 `script`, `on*` 속성을 제거합니다.
+- `domToVirtualDOM(node)`: 실제 DOM을 재귀 순회해 Virtual DOM 객체를 만듭니다.
+- `renderVirtualDOM(vNode)`: Virtual DOM 객체를 실제 DOM 노드로 렌더링합니다.
+- `virtualDOMToHTML(vNode)`: Virtual DOM을 다시 HTML 문자열로 직렬화합니다.
+
+### Diff 알고리즘
+
+- `diff(oldVNode, newVNode, path = [])`: 두 Virtual DOM을 비교해 Patch 목록을 반환합니다.
+- `diffProps(oldProps, newProps)`: 속성 단위의 추가/삭제/변경을 계산합니다.
+
+### Patch 적용
+
+- `applyPatches(rootElement, patches)`: Patch를 실제 DOM에 반영합니다.
+- `getNodeByPath(rootElement, path)`: path 배열로 특정 실제 DOM 노드를 찾습니다.
+
+### State History
+
+- `pushHistory(vNode)`: 새 상태를 history에 저장합니다.
+- `restoreHistory(index)`: 특정 history 상태를 통째로 복원합니다.
+- `cloneVNode(vNode)`: history 저장 시 깊은 복사를 수행합니다.
+
+### UI 제어
+
+- `handlePatch()`
+- `handleUndo()`
+- `handleRedo()`
+- `updateHistoryUI()`
+- `renderDiffLog(patches)`
+- `renderVDOMPreview(vNode)`
+
+## Diff 5가지 핵심 케이스 설명
+
+이 프로젝트의 Diff 알고리즘은 아래 5가지 케이스를 처리합니다.
+
+1. `ADD`
+   새 자식 노드가 생긴 경우
+2. `REMOVE`
+   기존 자식 노드가 사라진 경우
+3. `REPLACE`
+   노드 타입 또는 태그가 달라서 통째 교체해야 하는 경우
+4. `TEXT`
+   텍스트 노드 내용만 변경된 경우
+5. `PROPS`
+   속성 추가/삭제/변경이 필요한 경우
+
+예시 Patch:
+
+```js
+[
+  { type: "TEXT", path: [0, 1], text: "새 문구" },
+  { type: "PROPS", path: [0], set: { class: "active" }, remove: ["disabled"] },
+  { type: "ADD", path: [0], index: 2, node: { nodeType: "ELEMENT", tag: "li", props: {}, children: [] } },
+  { type: "REMOVE", path: [0], index: 1 },
+  { type: "REPLACE", path: [0, 0], node: { nodeType: "ELEMENT", tag: "div", props: {}, children: [] } }
+]
+```
+
+## Patch 반영 방식 설명
+
+Patch 버튼을 누르면 아래 순서로 동작합니다.
+
+1. textarea의 HTML 문자열 읽기
+2. 브라우저 DOM으로 파싱
+3. 새 Virtual DOM 생성
+4. 이전 Virtual DOM과 Diff 수행
+5. 실제 DOM에 Patch 적용
+6. 현재 상태 갱신
+7. history 저장
+8. Diff 로그와 Virtual DOM 미리보기 갱신
+
+중요한 점은 일반적인 Patch에서는 전체를 다시 렌더링하지 않고, 필요한 노드만 찾아서 수정한다는 것입니다.
+
+## History 동작 방식 설명
+
+- 초기 로드 시 `history[0]` 에 초기 상태 저장
+- Patch 성공 시 새 상태를 history에 추가
+- Undo 시 index 감소
+- Redo 시 index 증가
+- Undo 후 새 Patch를 하면 future history 삭제
+- Undo / Redo 는 안정성을 위해 실제 DOM을 통째 재렌더링
+- 복원 시 textarea도 함께 동기화
+
+즉, Patch는 부분 업데이트, History 복원은 전체 업데이트 전략을 사용합니다.
+
+## 사용한 브라우저 API
+
+- `document.createElement`
+- `template.innerHTML`
+- `childNodes`
+- `attributes`
+- `MutationObserver`
+- `Node.TEXT_NODE`
+- `Node.ELEMENT_NODE`
+- `replaceWith`
+- `insertBefore`
+- `removeChild`
+
+## 테스트 케이스 및 검증 결과
+
+아래 테스트는 화면 체크리스트와 함께 바로 확인할 수 있습니다.
+
+1. 텍스트만 변경
+   `li` 또는 `p` 내부 문구를 바꾸고 Patch
+   결과: `TEXT` Patch 생성
+2. 속성만 변경
+   `class`, `id`, `data-*`, `href` 변경
+   결과: `PROPS` Patch 생성
+3. 새 노드 추가
+   `ul` 안에 새 `li` 추가
+   결과: `ADD` Patch 생성
+4. 노드 삭제
+   기존 `li` 하나 삭제
+   결과: `REMOVE` Patch 생성
+5. 태그 타입 변경
+   `p` 를 `div` 로 변경
+   결과: `REPLACE` Patch 생성
+6. 중첩 자식 노드 변경
+   `strong` 또는 `span` 텍스트 변경
+   결과: 깊은 path의 `TEXT` 또는 `REPLACE`
+7. disabled 속성 변경
+   disabled 제거 또는 추가
+   결과: `PROPS` Patch에서 boolean 속성 반영
+8. Undo / Redo 동작
+   여러 번 Patch 후 뒤로가기 / 앞으로가기
+   결과: 실제 영역과 textarea 모두 복원
+9. Undo 후 새 Patch
+   Undo 한 뒤 다른 변경 적용
+   결과: 기존 future history 삭제
+10. MutationObserver 로그
+    Patch 후 추가/삭제/속성/텍스트 변경 로그 확인
+    결과: 사람이 읽기 쉬운 요약 메시지 출력
+
+## 잘못된 HTML 입력 처리
+
+- 브라우저는 잘못된 HTML을 자동 보정할 수 있습니다.
+- 예를 들어 닫히지 않은 태그나 중첩 규칙이 틀린 태그는 파서가 구조를 바꿔서 해석할 수 있습니다.
+- 이 데모는 파싱 후 정규화된 결과를 textarea에 다시 보여주므로, 실제 반영된 구조를 확인할 수 있습니다.
+
+## 현재 구현의 한계점
+
+1. 리스트 비교는 `key` 기반이 아니라 index 기반입니다.
+2. 복잡한 리스트 재정렬은 최적화하지 않았습니다.
+3. 스타일 속성은 문자열 전체 비교만 수행합니다.
+4. HTML 직렬화 결과는 브라우저 파서에 따라 원본 입력과 다를 수 있습니다.
+5. 이벤트 핸들러 문자열 속성(`onclick` 등)은 보안상 무시합니다.
+6. `script` 태그는 제거합니다.
+7. Undo / Redo 는 안정성을 위해 전체 재렌더링을 허용합니다.
+
+## 실행 방법
+
+1. 프로젝트 폴더에서 `index.html` 을 브라우저로 엽니다.
+2. 좌측 실제 영역에 초기 샘플 HTML이 렌더링됩니다.
+3. 우측 textarea에서 HTML을 수정합니다.
+4. `Patch` 버튼을 눌러 Diff와 Patch 결과를 확인합니다.
+5. `뒤로가기`, `앞으로가기` 버튼으로 history를 확인합니다.
+
+## 발표용 1분 요약
+
+"이 프로젝트는 React의 핵심 개념인 Virtual DOM과 Diff 알고리즘을 Vanilla JavaScript로 직접 구현한 데모입니다. 먼저 HTML 문자열이나 실제 DOM을 재귀적으로 읽어 Virtual DOM 객체 트리로 바꾸고, 이전 상태와 새 상태를 비교해 ADD, REMOVE, REPLACE, TEXT, PROPS 다섯 종류의 Patch를 만듭니다. 그리고 이 Patch만 실제 DOM에 적용해서 전체를 다시 그리지 않고 필요한 부분만 업데이트합니다. 추가로 상태를 history 배열에 저장해서 Undo/Redo를 지원하고, MutationObserver로 실제 DOM 변경까지 눈으로 확인할 수 있게 했습니다. 현재 구현은 key 없이 index 기반 비교를 사용하기 때문에 복잡한 리스트 재정렬에는 한계가 있지만, Virtual DOM의 핵심 흐름을 설명하기에는 충분한 구조입니다."

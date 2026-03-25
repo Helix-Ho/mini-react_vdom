@@ -1,8 +1,0 @@
-{
-  "name": "mini-react-vdom",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node tests/domToVNode.test.js && node tests/vNodeToDom.test.js && node tests/diff.test.js && node tests/applyPatch.test.js && node tests/history.test.js && node tests/keyedIdentity.test.js"
-  }
-}

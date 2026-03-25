@@ -1,0 +1,6 @@
+2026/03/26-00:31:02.721 67ec Reusing MANIFEST c:\KJ_4th_5TEAM\output\verify\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/03/26-00:31:02.723 67ec Recovering log #4
+2026/03/26-00:31:02.748 67ec Reusing old log c:\KJ_4th_5TEAM\output\verify\edge-profile\Default\EdgeCoupons/coupons_data.db/000004.log 
+2026/03/26-00:31:04.276 4e60 Level-0 table #8: started
+2026/03/26-00:31:04.285 4e60 Level-0 table #8: 681928 bytes OK
+2026/03/26-00:31:04.288 4e60 Delete type=0 #4
