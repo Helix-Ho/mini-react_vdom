@@ -175,7 +175,7 @@ select {
 }
 
 .panel-head h2 {
-  font-size: clamp(2.1rem, 4vw, 3.3rem);
+  font-size: clamp(1.47rem, 2.8vw, 2.31rem);
   letter-spacing: -0.04em;
 }
 
@@ -457,10 +457,10 @@ select {
 }
 
 .command-bar {
-  display: flex;
+  display: grid;
   flex: 0 0 auto;
+  grid-template-columns: max-content minmax(320px, 420px) minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   padding: 10px;
 }
@@ -474,6 +474,20 @@ select {
 
 .primary-actions {
   min-width: 0;
+  justify-content: flex-start;
+}
+
+.test-actions {
+  min-width: 0;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.command-status {
+  width: min(100%, 420px);
+  min-width: 0;
+  justify-self: center;
 }
 
 .action-button {
@@ -502,7 +516,9 @@ select {
 }
 
 .test-button {
-  min-width: 86px;
+  min-width: 0;
+  padding: 0 12px;
+  white-space: nowrap;
 }
 
 .action-button:disabled {
@@ -580,7 +596,7 @@ select {
   }
 
   .panel-head h2 {
-    font-size: clamp(1.8rem, 8vw, 2.7rem);
+    font-size: clamp(1.26rem, 5.6vw, 1.89rem);
   }
 
   .status-pill,
@@ -590,12 +606,22 @@ select {
   }
 
   .command-bar {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: stretch;
   }
 
   .command-group {
     width: 100%;
+  }
+
+  .test-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .command-status {
+    justify-self: stretch;
   }
 
   .command-group .action-button {
