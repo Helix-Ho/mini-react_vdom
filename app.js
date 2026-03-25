@@ -107,14 +107,12 @@ function init() {
   cacheElements();
   bindUIEvents();
 
-  const initialDOM = parseHTMLToDOM(SAMPLE_HTML);
-  mountActualDOM(initialDOM);
-
-  const actualRoot = state.elements.actualCanvas.firstChild;
-  const initialVNode = domToVirtualDOM(actualRoot);
-  const initialHTML = virtualDOMToHTML(initialVNode);
+  const initialState = buildParsedState(SAMPLE_HTML);
+  const initialVNode = initialState.vNode;
+  const initialHTML = initialState.normalizedHTML;
 
   state.currentVNode = cloneVNode(initialVNode);
+  renderActualTree(initialVNode);
   state.elements.htmlEditor.value = initialHTML;
   pushHistory(initialVNode);
 
