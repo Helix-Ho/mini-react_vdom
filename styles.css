@@ -75,7 +75,7 @@ select {
 
 .board-layout {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1.08fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(150px, 0.34fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 14px;
   min-height: 0;
   height: 100%;
