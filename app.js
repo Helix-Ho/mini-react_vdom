@@ -107,18 +107,22 @@ function init() {
   cacheElements();
   bindUIEvents();
 
-  const initialState = buildParsedState(SAMPLE_HTML);
+  const initialDOM = parseHTMLToDOM(SAMPLE_HTML);
+  mountActualDOM(initialDOM);
 
-  state.currentVNode = cloneVNode(initialState.vNode);
-  renderActualTree(initialState.vNode);
-  state.elements.htmlEditor.value = SAMPLE_HTML;
-  pushHistory(initialState.vNode);
+  const actualRoot = state.elements.actualCanvas.firstChild;
+  const initialVNode = domToVirtualDOM(actualRoot);
+  const initialHTML = virtualDOMToHTML(initialVNode);
+
+  state.currentVNode = cloneVNode(initialVNode);
+  state.elements.htmlEditor.value = initialHTML;
+  pushHistory(initialVNode);
 
   connectObserver();
-  syncPendingState(SAMPLE_HTML);
+  syncPendingState(initialHTML);
   renderDiffLog([]);
   renderMutationLog();
-  updateParserNote(SAMPLE_HTML, initialState.normalizedHTML);
+  updateParserNote(SAMPLE_HTML, initialHTML);
   setPatchSummary("초기 샘플 상태를 history[0]에 저장했습니다.");
   updateHistoryUI();
 }
@@ -821,6 +825,16 @@ function renderTreeIntoCanvas(canvas, vNode) {
   }
 
   canvas.appendChild(renderVirtualDOM(vNode));
+}
+
+function mountActualDOM(rootNode) {
+  state.elements.actualCanvas.innerHTML = "";
+
+  if (!rootNode) {
+    return;
+  }
+
+  state.elements.actualCanvas.appendChild(rootNode);
 }
 
 function renderActualTree(vNode) {
