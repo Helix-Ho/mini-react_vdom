@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual DOM Mini Project</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <main class="workspace">
+        <section class="panel panel--controls" aria-label="Patch and history controls">
+          <div class="panel__bar">
+            <span class="panel__label">Patch / History</span>
+            <span id="history-meta" class="meta-pill">Snapshot 1/1</span>
+          </div>
+          <div class="control-strip">
+            <button id="patch-button" class="button button--primary" type="button">Patch</button>
+            <button id="back-button" class="button" type="button" disabled>Back</button>
+            <button id="forward-button" class="button" type="button" disabled>Forward</button>
+          </div>
+          <div class="preset-strip">
+            <div id="preset-bar" class="preset-bar" aria-label="Demo preset scenarios"></div>
+            <span id="preset-meta" class="meta-inline">Reset baseline, then load a preset into the textarea.</span>
+          </div>
+        </section>
+
+        <section class="panel panel--actual" aria-label="Actual area">
+          <div class="panel__bar">
+            <span class="panel__label">Actual</span>
+            <span class="meta-inline">Baseline DOM</span>
+          </div>
+          <div id="actual-root" class="render-surface" aria-live="polite"></div>
+        </section>
+
+        <section class="panel panel--preview" aria-label="Preview area">
+          <div class="panel__bar">
+            <span class="panel__label">Preview</span>
+            <span id="preview-meta" class="meta-inline">Waiting for VNode render</span>
+          </div>
+          <div id="preview-root" class="render-surface render-surface--preview" aria-live="polite"></div>
+        </section>
+
+        <section class="panel panel--input" aria-label="HTML input">
+          <div class="panel__bar">
+            <span class="panel__label">Input</span>
+            <span id="input-meta" class="meta-inline">Sample HTML source</span>
+          </div>
+          <label class="sr-only" for="html-input">HTML input</label>
+          <textarea
+            id="html-input"
+            class="html-input"
+            spellcheck="false"
+            aria-describedby="preview-meta"
+          ></textarea>
+        </section>
+
+        <section class="panel panel--inspect" aria-label="Inspection panels">
+          <div class="inspection-grid">
+            <section class="inspector-card" aria-label="VNode snapshot">
+              <div class="card-bar">
+                <span class="panel__label">VNode</span>
+                <span id="vdom-meta" class="meta-inline">Waiting for VDOM output</span>
+              </div>
+              <pre id="vdom-output" class="code-view" aria-live="polite"></pre>
+            </section>
+
+            <section class="inspector-card" aria-label="Patch output">
+              <div class="card-bar">
+                <span class="panel__label">Patch JSON</span>
+                <span id="patch-meta" class="meta-inline">Click Patch to generate and apply patches</span>
+              </div>
+              <pre id="patch-output" class="code-view" aria-live="polite"></pre>
+            </section>
+
+            <section class="inspector-card" aria-label="Patch log">
+              <div class="card-bar">
+                <span class="panel__label">Patch Log</span>
+                <span class="meta-inline">Human-readable</span>
+              </div>
+              <ol id="patch-log" class="patch-log" aria-live="polite"></ol>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
