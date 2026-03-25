@@ -1,90 +1,113 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Virtual DOM Mini Project</title>
-    <link rel="stylesheet" href="./src/styles.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <main class="workspace">
-        <section class="panel panel--controls" aria-label="Patch and history controls">
-          <div class="panel__bar">
-            <span class="panel__label">Patch / History</span>
-            <span id="history-meta" class="meta-pill">Snapshot 1/1</span>
-          </div>
-          <div class="control-strip">
-            <button id="patch-button" class="button button--primary" type="button">Patch</button>
-            <button id="back-button" class="button" type="button" disabled>Back</button>
-            <button id="forward-button" class="button" type="button" disabled>Forward</button>
-          </div>
-          <div class="preset-strip">
-            <div id="preset-bar" class="preset-bar" aria-label="Demo preset scenarios"></div>
-            <span id="preset-meta" class="meta-inline">Reset baseline, then load a preset into the textarea.</span>
-          </div>
-        </section>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla JS Virtual DOM Diff Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Vanilla JavaScript Demo</p>
+        <h1>Virtual DOM + Diff + Patch + History</h1>
+        <p class="hero-copy">
+          실제 DOM을 Virtual DOM으로 변환하고, 두 상태를 비교한 뒤, 필요한 부분만 Patch로 반영하는 흐름을 한 화면에서 확인할 수 있습니다.
+        </p>
+      </div>
+      <div class="hero-note">
+        <strong>학습 포인트</strong>
+        <span>DOM 파싱, 재귀 트리 순회, index 기반 Diff, 부분 Patch, MutationObserver, Undo/Redo</span>
+      </div>
+    </header>
 
-        <section class="panel panel--actual" aria-label="Actual area">
-          <div class="panel__bar">
-            <span class="panel__label">Actual</span>
-            <span class="meta-inline">Baseline DOM</span>
-          </div>
-          <div id="actual-root" class="render-surface" aria-live="polite"></div>
-        </section>
+    <section class="controls card">
+      <div class="control-group">
+        <button id="patch-button" class="action-button primary" type="button">Patch</button>
+        <button id="undo-button" class="action-button" type="button">뒤로가기</button>
+        <button id="redo-button" class="action-button" type="button">앞으로가기</button>
+      </div>
+      <div class="status-group">
+        <div class="status-chip">
+          <span class="status-label">History</span>
+          <strong id="history-status">0 / 0</strong>
+        </div>
+        <div class="status-chip wide">
+          <span class="status-label">마지막 Patch 요약</span>
+          <strong id="patch-summary">초기 상태를 준비하는 중...</strong>
+        </div>
+      </div>
+    </section>
 
-        <section class="panel panel--preview" aria-label="Preview area">
-          <div class="panel__bar">
-            <span class="panel__label">Preview</span>
-            <span id="preview-meta" class="meta-inline">Waiting for VNode render</span>
-          </div>
-          <div id="preview-root" class="render-surface render-surface--preview" aria-live="polite"></div>
-        </section>
+    <section class="checklist card">
+      <div class="panel-header">
+        <h2>빠른 테스트 체크리스트</h2>
+        <p>아래 항목은 화면과 README에서 모두 확인할 수 있습니다.</p>
+      </div>
+      <ol class="checklist-grid">
+        <li>텍스트만 변경</li>
+        <li>속성만 변경</li>
+        <li>새 노드 추가</li>
+        <li>노드 삭제</li>
+        <li>태그 타입 변경</li>
+        <li>중첩 자식 변경</li>
+        <li>disabled 속성 변경</li>
+        <li>Undo / Redo</li>
+        <li>Undo 후 새 Patch</li>
+        <li>MutationObserver 로그</li>
+      </ol>
+    </section>
 
-        <section class="panel panel--input" aria-label="HTML input">
-          <div class="panel__bar">
-            <span class="panel__label">Input</span>
-            <span id="input-meta" class="meta-inline">Sample HTML source</span>
-          </div>
-          <label class="sr-only" for="html-input">HTML input</label>
-          <textarea
-            id="html-input"
-            class="html-input"
-            spellcheck="false"
-            aria-describedby="preview-meta"
-          ></textarea>
-        </section>
+    <main class="workspace">
+      <section class="panel card">
+        <div class="panel-header">
+          <h2>실제 영역</h2>
+          <p>Patch 결과가 실제 DOM에 부분적으로 반영되는 영역입니다.</p>
+        </div>
+        <div id="actual-canvas" class="actual-canvas" aria-live="polite"></div>
+      </section>
 
-        <section class="panel panel--inspect" aria-label="Inspection panels">
-          <div class="inspection-grid">
-            <section class="inspector-card" aria-label="VNode snapshot">
-              <div class="card-bar">
-                <span class="panel__label">VNode</span>
-                <span id="vdom-meta" class="meta-inline">Waiting for VDOM output</span>
-              </div>
-              <pre id="vdom-output" class="code-view" aria-live="polite"></pre>
-            </section>
+      <section class="panel card">
+        <div class="panel-header">
+          <h2>테스트 영역</h2>
+          <p>HTML을 자유롭게 수정한 뒤 Patch 버튼으로 Diff를 실행하세요.</p>
+        </div>
+        <label class="sr-only" for="html-editor">HTML editor</label>
+        <textarea id="html-editor" class="html-editor" spellcheck="false"></textarea>
+        <p id="parser-note" class="panel-note">
+          브라우저 파서는 잘못된 HTML을 자동 보정할 수 있고, <code>script</code> 태그와 <code>on*</code> 이벤트 속성은 제거됩니다.
+        </p>
+      </section>
+    </main>
 
-            <section class="inspector-card" aria-label="Patch output">
-              <div class="card-bar">
-                <span class="panel__label">Patch JSON</span>
-                <span id="patch-meta" class="meta-inline">Click Patch to generate and apply patches</span>
-              </div>
-              <pre id="patch-output" class="code-view" aria-live="polite"></pre>
-            </section>
+    <section class="bottom-panels">
+      <article class="panel card">
+        <div class="panel-header">
+          <h2>Diff 결과 로그</h2>
+          <p>Diff 알고리즘이 찾은 Patch 목록입니다.</p>
+        </div>
+        <div id="diff-log" class="log-list"></div>
+      </article>
 
-            <section class="inspector-card" aria-label="Patch log">
-              <div class="card-bar">
-                <span class="panel__label">Patch Log</span>
-                <span class="meta-inline">Human-readable</span>
-              </div>
-              <ol id="patch-log" class="patch-log" aria-live="polite"></ol>
-            </section>
-          </div>
-        </section>
-      </main>
-    </div>
+      <article class="panel card">
+        <div class="panel-header">
+          <h2>Virtual DOM JSON</h2>
+          <p>현재 상태의 Virtual DOM 요약입니다.</p>
+        </div>
+        <pre id="vdom-preview" class="code-panel"></pre>
+      </article>
 
-    <script type="module" src="./src/main.js"></script>
-  </body>
+      <article class="panel card">
+        <div class="panel-header">
+          <h2>MutationObserver 로그</h2>
+          <p>Patch 또는 History 복원 시 실제 DOM에서 발생한 mutation을 기록합니다.</p>
+        </div>
+        <div id="mutation-log" class="log-list"></div>
+      </article>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
 </html>
