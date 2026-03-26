@@ -1100,7 +1100,7 @@ function updateParserNote(rawHTML, normalizedHTML) {
   const trimmedNormalized = (normalizedHTML || "").trim();
 
   if (trimmedRaw !== trimmedNormalized) {
-    state.elements.parserNote.textContent = "입력 HTML이 브라우저 파서와 보안 규칙에 따라 정규화되었습니다. 편집 영역은 정리된 결과로 다시 동기화됩니다.";
+    state.elements.parserNote.textContent = "";
     return;
   }
 
